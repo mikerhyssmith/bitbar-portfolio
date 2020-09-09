@@ -1,4 +1,4 @@
-#!/usr/bin/env PYTHONIOENCODING=UTF-8 /home/mike/.pyenv/shims/python
+#!/usr/bin/env PYTHONIOENCODING=UTF-8 /usr/local/bin/python3
 
 # <bitbar.title>Portfolio</bitbar.title>
 # <bitbar.version>v0.1</bitbar.version>
@@ -10,9 +10,18 @@
 
 import os
 from alpha_vantage.timeseries import TimeSeries
+from dotenv import load_dotenv
+load_dotenv()
 
-symbols = ['lgen.l']
-ts = TimeSeries(output_format='json')
+ALPHA_KEY = os.getenv('ALPHAVANTAGE_API_KEY')
+PORTFOLIO_SYMBOLS = os.getenv('PORTFOLIO_SYMBOLS')
+
+if not ALPHA_KEY or not PORTFOLIO_SYMBOLS:
+    print("Portfolio requires configuration | color=red")
+    exit()
+
+symbols = PORTFOLIO_SYMBOLS.split(',')
+ts = TimeSeries(key=ALPHA_KEY, output_format='json')
 
 results_dict = {}
 change = 0
@@ -27,7 +36,7 @@ for symbol in symbols:
     change_substr = symbol_change[:-1]
     change = change + float(change_substr)
 
-avg_change = change / len(symbols)
+avg_change = round(change / len(symbols), 2)
 is_positive = avg_change > 0
 is_negative = avg_change < 0
 is_neutral = avg_change == 0
